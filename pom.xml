@@ -4,10 +4,22 @@
   <artifactId>hadoop-book-mr-dev</artifactId>
   <version>3.0</version>
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <jackson.version>1.9.5</jackson.version>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
   <dependencies>
+      <dependency>
+          <groupId>org.codehaus.jackson</groupId>
+          <artifactId>jackson-core-asl</artifactId>
+          <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.codehaus.jackson</groupId>
+          <artifactId>jackson-mapper-asl</artifactId>
+          <version>${jackson.version}</version>
+      </dependency>
+
     <!-- Hadoop main artifact -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
