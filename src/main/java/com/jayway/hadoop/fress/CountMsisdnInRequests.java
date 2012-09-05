@@ -19,6 +19,8 @@ import java.io.IOException;
 
 public class CountMsisdnInRequests extends Configured implements Tool {
 
+    enum ERROR {ERROR}
+
     @Override
     public int run(String[] args) throws Exception {
         if (args.length != 2) {
@@ -61,9 +63,7 @@ class CountMsisdnInRequestsMapper extends Mapper<LongWritable, Text, Text, IntWr
         JsonNode node = null;
         try {
             node = mapper.readValue(value.getBytes(), JsonNode.class);
-        } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
-        }
+
 
         if (node != null && node.has("payload") && node.get("payload").has("id")) {
             if (node.get("payload").has("params")) {
@@ -73,6 +73,10 @@ class CountMsisdnInRequestsMapper extends Mapper<LongWritable, Text, Text, IntWr
                     context.write(new Text(msisdn), new IntWritable(1));
                 }
             }
+        }
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            context.getCounter(CountMsisdnInRequests.ERROR.ERROR).increment(1);
         }
     }
 }
