@@ -3,12 +3,12 @@
 
   <property>
     <name>fs.default.name</name>
-    <value>hdfs://namenode/</value>
+    <value>hdfs://master/</value>
   </property>
   
   <property>
     <name>mapred.job.tracker</name>
-    <value>jobtracker:8021</value>
+    <value>master:8021</value>
   </property>
   
 </configuration>

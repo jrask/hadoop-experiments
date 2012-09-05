@@ -76,7 +76,7 @@ class CountMsisdnInRequestsMapper extends Mapper<LongWritable, Text, Text, IntWr
         }
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            context.getCounter(CountMsisdnInRequests.ERROR.ERROR).increment(1);
+            //context.getCounter(CountMsisdnInRequests.ERROR.ERROR).increment(1);
         }
     }
 }
