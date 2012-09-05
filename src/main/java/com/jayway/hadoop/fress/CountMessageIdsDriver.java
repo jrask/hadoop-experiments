@@ -17,7 +17,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 
-public class CountMessageIdDriver extends Configured implements Tool {
+public class CountMessageIdsDriver extends Configured implements Tool {
+
     @Override
     public int run(String[] args) throws Exception {
         if (args.length != 2) {
@@ -44,7 +45,7 @@ public class CountMessageIdDriver extends Configured implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
-        int exitCode = ToolRunner.run(new CountMessageIdDriver(), args);
+        int exitCode = ToolRunner.run(new CountMessageIdsDriver(), args);
         System.exit(exitCode);
     }
 
