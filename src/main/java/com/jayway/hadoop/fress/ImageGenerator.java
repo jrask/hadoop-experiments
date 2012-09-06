@@ -48,7 +48,7 @@ public class ImageGenerator extends Configured implements Tool {
         //job.setCombinerClass(FressExcludeDuplicateMessagesReducer.class);
         job.setReducerClass(ImageGeneratorReducer.class);
 
-        job.setOutputKeyClass(NullWritable.class);
+        job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(BytesWritable.class);
         job.setOutputFormatClass(ByteOutputFormat.class);
 
