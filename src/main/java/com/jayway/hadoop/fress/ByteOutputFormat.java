@@ -11,34 +11,12 @@ import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class ByteOutputFormat<K,V> extends FileOutputFormat {
-//   // @Override
-//    public RecordWriter ggetRecordWriter(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-//        if (!getCompressOutput(taskAttemptContext.)) {
-//            Path file = taskAttemptContext.
-//            Path file = FileOutputFormat.getTaskOutputPath(job, name);
-//            FileSystem fs = file.getFileSystem(job);
-//            FSDataOutputStream fileOut = fs.create(file, progress);
-//            return new ByteRecordWriter<K, V>(fileOut);
-//        } else {
-//            Class codecClass = getOutputCompressorClass(job, DefaultCodec.class);
-//            CompressionCodec codec = (CompressionCodec) ReflectionUtils.newInstance(codecClass, job);
-//            Path file = FileOutputFormat.getTaskOutputPath(job, name + codec.getDefaultExtension());
-//            FileSystem fs = file.getFileSystem(job);
-//            FSDataOutputStream fileOut = fs.create(file, progress);
-//            return new ByteRecordWriter<K, V>(new DataOutputStream(codec.createOutputStream(fileOut)));
-//
-//        }
-//    }
-
-
-
+public class ByteOutputFormat<K, V> extends FileOutputFormat {
 
 
     public RecordWriter<K, V> getRecordWriter(TaskAttemptContext job
@@ -48,12 +26,11 @@ public class ByteOutputFormat<K,V> extends FileOutputFormat {
 
         Configuration conf = job.getConfiguration();
         boolean isCompressed = getCompressOutput(job);
-        String keyValueSeparator= conf.get("mapred.textoutputformat.separator","\t");
         CompressionCodec codec = null;
         String extension = "";
         if (isCompressed) {
             Class<? extends CompressionCodec> codecClass =
-            getOutputCompressorClass(job, GzipCodec.class);
+                    getOutputCompressorClass(job, GzipCodec.class);
             codec = (CompressionCodec) ReflectionUtils.newInstance(codecClass, conf);
             extension = codec.getDefaultExtension();
         }
@@ -65,16 +42,13 @@ public class ByteOutputFormat<K,V> extends FileOutputFormat {
         } else {
             FSDataOutputStream fileOut = fs.create(file, false);
             return new ByteRecordWriter<K, V>(new DataOutputStream
-            (codec.createOutputStream(fileOut)));
+                    (codec.createOutputStream(fileOut)));
         }
-
     }
-
-
 }
 
 
- class ByteRecordWriter<K, V> extends RecordWriter<K, V> {
+class ByteRecordWriter<K, V> extends RecordWriter<K, V> {
     private DataOutputStream out;
 
     public ByteRecordWriter(DataOutputStream out) {
@@ -89,10 +63,8 @@ public class ByteOutputFormat<K,V> extends FileOutputFormat {
         }
     }
 
-     @Override
-     public void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+    @Override
+    public void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
         out.close();
-     }
-
-
+    }
 }

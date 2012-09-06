@@ -37,6 +37,9 @@ public class ImageGenerator extends Configured implements Tool {
         Job job = new Job(getConf(), "Fress logs");
         job.setJarByClass(getClass());
 
+
+        MultipleOutputs.addNamedOutput(job, "image", ByteOutputFormat.class,
+                NullWritable.class, BytesWritable.class);
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
@@ -101,6 +104,11 @@ class ImageGeneratorReducer extends Reducer< NullWritable, BytesWritable,NullWri
     @Override
     protected void reduce(NullWritable key, Iterable<BytesWritable> values, Context context) throws IOException, InterruptedException {
 
-        outputs.write(NullWritable.get(), values.iterator().next(), "images/image" + System.currentTimeMillis() + ".jpg");
+
+        int count = 0;
+        for(BytesWritable image: values) {
+            count++;
+            outputs.write(NullWritable.get(), image, "images/image-" + count + ".jpg");
+        }
     }
 }
