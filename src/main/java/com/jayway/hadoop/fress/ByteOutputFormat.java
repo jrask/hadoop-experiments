@@ -58,14 +58,17 @@ class ByteRecordWriter<K, V> extends RecordWriter<K, V> {
     public void write(K key, V value) throws IOException {
         boolean nullValue = value == null || value instanceof NullWritable;
         if (!nullValue) {
+
             BytesWritable bw = (BytesWritable) value;
-            out.write(bw.copyBytes());
-            out.flush();
-        } else {
-            out.write(new byte[]{0,1,2,3,4,5,6,7,7,7,5,5,5,5});
+            if (bw.getLength() > 0) {
+                out.write(bw.copyBytes());
+                out.flush();
+            } else {
+                out.write(new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 5, 5, 5, 5});
+                out.flush();
+            }
         }
     }
-
 
 
     @Override
