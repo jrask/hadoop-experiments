@@ -19,6 +19,7 @@ import org.codehaus.jackson.JsonNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 public class ImageGenerator extends Configured implements Tool {
 
@@ -38,8 +39,8 @@ public class ImageGenerator extends Configured implements Tool {
         job.setJarByClass(getClass());
 
 
-        MultipleOutputs.addNamedOutput(job, "image", ByteOutputFormat.class,
-                NullWritable.class, BytesWritable.class);
+        //MultipleOutputs.addNamedOutput(job, "image", ByteOutputFormat.class,
+          //      NullWritable.class, BytesWritable.class);
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
@@ -108,7 +109,7 @@ class ImageGeneratorReducer extends Reducer< NullWritable, BytesWritable,NullWri
         for(BytesWritable image: values) {
             count++;
             if(image.getLength() > 0) {
-                outputs.write(NullWritable.get(), image, "images/image-" + count + ".jpg");
+                outputs.write(NullWritable.get(), image, "images/image-" + UUID.randomUUID().toString() + ".jpg");
             }
         }
     }
