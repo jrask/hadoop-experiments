@@ -108,7 +108,9 @@ class ImageGeneratorReducer extends Reducer< NullWritable, BytesWritable,NullWri
         int count = 0;
         for(BytesWritable image: values) {
             count++;
-            outputs.write(NullWritable.get(), image, "images/image-" + count + ".jpg");
+            if(image.getLength() > 0) {
+                outputs.write(NullWritable.get(), image, "images/image-" + count + ".jpg");
+            }
         }
     }
 }

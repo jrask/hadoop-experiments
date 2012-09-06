@@ -59,7 +59,8 @@ class ByteRecordWriter<K, V> extends RecordWriter<K, V> {
         boolean nullValue = value == null || value instanceof NullWritable;
         if (!nullValue) {
             BytesWritable bw = (BytesWritable) value;
-            out.write(bw.get(), 0, bw.getSize());
+            out.write(bw.copyBytes(), 0, bw.getLength());
+            out.flush();
         }
     }
 
