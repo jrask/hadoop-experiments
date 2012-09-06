@@ -1,0 +1,106 @@
+package com.jayway.hadoop.fress;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileAsBinaryOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+import org.codehaus.jackson.JsonNode;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+public class ImageGenerator extends Configured implements Tool {
+
+
+
+
+    @Override
+    public int run(String[] args) throws Exception {
+        if (args.length != 2) {
+            System.err.printf("Usage: %s [generic options] <input> <output>\n",
+                    getClass().getSimpleName());
+            ToolRunner.printGenericCommandUsage(System.err);
+            return -1;
+        }
+
+        Job job = new Job(getConf(), "Fress logs");
+        job.setJarByClass(getClass());
+
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+        job.setMapperClass(ImageGeneratorMapper.class);
+        //job.setCombinerClass(FressExcludeDuplicateMessagesReducer.class);
+        job.setReducerClass(ImageGeneratorReducer.class);
+
+        job.setOutputKeyClass(NullWritable.class);
+        job.setOutputValueClass(BytesWritable.class);
+        job.setOutputFormatClass(ByteOutputFormat.class);
+
+        return job.waitForCompletion(true) ? 0 : 1;
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        System.out.println("***********");
+
+        System.out.println("Is Interface: " + TaskAttemptContext.class.isInterface());
+        System.out.println("******");
+
+        int exitCode = ToolRunner.run(new ImageGenerator(), args);
+        System.exit(exitCode);
+    }
+}
+
+
+class ImageGeneratorMapper extends Mapper<LongWritable, Text, NullWritable,BytesWritable> {
+
+    byte[] imageAsBase64;
+
+
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        //imageAsBase64 = getBase64();
+    }
+
+    @Override
+    protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+
+        JsonNode node = JsonUtil.fromText(value);
+
+        try {
+            String image = node.get("payload").get("params").get("image").get("encoded").getTextValue();
+            System.out.println(node.get("payload").get("id").getTextValue());
+            byte bytes[] = Base64.decodeBase64(image.getBytes());
+            context.write(NullWritable.get(),new BytesWritable(bytes));
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+}
+
+class ImageGeneratorReducer extends Reducer< NullWritable, BytesWritable,NullWritable,BytesWritable> {
+    MultipleOutputs<NullWritable,BytesWritable> outputs;
+
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        outputs = new MultipleOutputs<NullWritable, BytesWritable>(context);
+    }
+
+    @Override
+    protected void reduce(NullWritable key, Iterable<BytesWritable> values, Context context) throws IOException, InterruptedException {
+
+        outputs.write(NullWritable.get(), values.iterator().next(), "images/image" + System.currentTimeMillis() + ".jpg");
+    }
+}
