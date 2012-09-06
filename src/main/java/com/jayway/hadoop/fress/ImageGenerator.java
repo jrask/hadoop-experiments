@@ -68,7 +68,7 @@ public class ImageGenerator extends Configured implements Tool {
 }
 
 
-class ImageGeneratorMapper extends Mapper<LongWritable, Text, NullWritable,BytesWritable> {
+class ImageGeneratorMapper extends Mapper<LongWritable, Text, Text,BytesWritable> {
 
     byte[] imageAsBase64;
 
@@ -87,29 +87,29 @@ class ImageGeneratorMapper extends Mapper<LongWritable, Text, NullWritable,Bytes
             String image = node.get("payload").get("params").get("image").get("encoded").getTextValue();
             System.out.println(node.get("payload").get("id").getTextValue());
             byte bytes[] = Base64.decodeBase64(image.getBytes());
-            context.write(NullWritable.get(),new BytesWritable(bytes));
+            context.write(new Text(UUID.randomUUID().toString()),new BytesWritable(bytes));
         } catch (NullPointerException e) {
             System.out.println(e.getMessage());
         }
     }
 }
 
-class ImageGeneratorReducer extends Reducer< NullWritable, BytesWritable,NullWritable,BytesWritable> {
-    MultipleOutputs<NullWritable,BytesWritable> outputs;
+class ImageGeneratorReducer extends Reducer< Text, BytesWritable,Text,BytesWritable> {
+    MultipleOutputs<Text,BytesWritable> outputs;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
-        outputs = new MultipleOutputs<NullWritable, BytesWritable>(context);
+        outputs = new MultipleOutputs<Text, BytesWritable>(context);
     }
 
     @Override
-    protected void reduce(NullWritable key, Iterable<BytesWritable> values, Context context) throws IOException, InterruptedException {
+    protected void reduce(Text key, Iterable<BytesWritable> values, Context context) throws IOException, InterruptedException {
 
         int count = 0;
         for(BytesWritable image: values) {
             count++;
             if(image.getLength() > 0) {
-                outputs.write(NullWritable.get(), image, "images/image-" + UUID.randomUUID().toString() + ".jpg");
+                outputs.write(key, image, "images/image-" + UUID.randomUUID().toString() + ".jpg");
             }
         }
     }
