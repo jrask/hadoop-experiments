@@ -104,7 +104,6 @@ class ImageGeneratorReducer extends Reducer< NullWritable, BytesWritable,NullWri
     @Override
     protected void reduce(NullWritable key, Iterable<BytesWritable> values, Context context) throws IOException, InterruptedException {
 
-
         int count = 0;
         for(BytesWritable image: values) {
             count++;

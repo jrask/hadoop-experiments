@@ -59,10 +59,14 @@ class ByteRecordWriter<K, V> extends RecordWriter<K, V> {
         boolean nullValue = value == null || value instanceof NullWritable;
         if (!nullValue) {
             BytesWritable bw = (BytesWritable) value;
-            out.write(bw.copyBytes(), 0, bw.getLength());
+            out.write(bw.copyBytes());
             out.flush();
+        } else {
+            out.write(new byte[]{0,1,2,3,4,5,6,7,7,7,5,5,5,5});
         }
     }
+
+
 
     @Override
     public void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
