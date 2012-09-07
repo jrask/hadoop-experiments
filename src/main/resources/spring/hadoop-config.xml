@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:hdp="http://www.springframework.org/schema/hadoop"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+    <hdp:configuration id="hadoopConfiguration"
+                       resources="file:conf/hadoop-local.xml">
+    </hdp:configuration>
+
+
+    <bean id="processJsonMessagesIntoImages" class="org.springframework.data.hadoop.mapreduce.JobRunner">
+        <property name="runAtStartup" value="true"/>
+        <property name="waitForJobs" value="true"/>
+        <property name="jobs">
+            <util:list>
+                <hdp:job id="extractJsonMessagesJob"
+                         input-path="input/fress/fresslogs.log" output-path="output/json"
+                         mapper="com.jayway.hadoop.fress.ExtractJsonRpcMessagesMapper"
+                         reducer="com.jayway.hadoop.fress.ExtractJsonRpcMessagesReducer"
+                        />
+                <hdp:job id="countMessagePreExcluded"
+                         input-path="output/json" output-path="output/json-cnt"
+                         mapper="com.jayway.hadoop.fress.CountMessageIdMapper"
+                         reducer="com.jayway.hadoop.fress.CountMessageIdReducer"
+                         validate-paths="false"
+                        />
+                <hdp:job id="excludeDuplicateMessagesJob"
+                         input-path="output/json" output-path="output/json-excluded"
+                         mapper="com.jayway.hadoop.fress.ExcludeDuplicateMessagesMapper"
+                         reducer="com.jayway.hadoop.fress.ExcludeDuplicateMessagesReducer"
+                         validate-paths="false"
+                        />
+                <hdp:job id="countMessagePostExcluded"
+                         input-path="output/json-excluded" output-path="output/json-excluded-cnt"
+                         mapper="com.jayway.hadoop.fress.CountMessageIdMapper"
+                         reducer="com.jayway.hadoop.fress.CountMessageIdReducer"
+                         validate-paths="false"
+                        />
+                <hdp:job id="decodeImagesJobb"
+                         input-path="output/json-excluded" output-path="output/json-decoded"
+                         output-format="com.jayway.hadoop.util.ByteOutputFormat"
+                         value="org.apache.hadoop.io.BytesWritable"
+                         mapper="com.jayway.hadoop.fress.ImageGeneratorMapper"
+                         reducer="com.jayway.hadoop.fress.ImageGeneratorReducer"
+                         validate-paths="false"/>
+            </util:list>
+        </property>
+    </bean>
+
+</beans>

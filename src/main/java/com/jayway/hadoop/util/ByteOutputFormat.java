@@ -1,4 +1,4 @@
-package com.jayway.hadoop.fress;
+package com.jayway.hadoop.util;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -19,9 +19,7 @@ import java.io.IOException;
 public class ByteOutputFormat<K, V> extends FileOutputFormat {
 
 
-    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext job
-
-    ) throws IOException, InterruptedException {
+    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext job) throws IOException, InterruptedException {
 
 
         Configuration conf = job.getConfiguration();
@@ -58,15 +56,9 @@ class ByteRecordWriter<K, V> extends RecordWriter<K, V> {
     public void write(K key, V value) throws IOException {
         boolean nullValue = value == null || value instanceof NullWritable;
         if (!nullValue) {
-
             BytesWritable bw = (BytesWritable) value;
-            if (bw.getLength() > 0) {
-                out.write(bw.copyBytes());
-                out.flush();
-            } else {
-                out.write(new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 5, 5, 5, 5});
-                out.flush();
-            }
+            out.write(bw.getBytes());
+            out.flush();
         }
     }
 
