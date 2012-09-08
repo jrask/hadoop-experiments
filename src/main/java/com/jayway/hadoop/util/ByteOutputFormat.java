@@ -53,18 +53,18 @@ class ByteRecordWriter<K, V> extends RecordWriter<K, V> {
         this.out = out;
     }
 
-    public void write(K key, V value) throws IOException {
+    public synchronized void write(K key, V value) throws IOException {
         boolean nullValue = value == null || value instanceof NullWritable;
         if (!nullValue) {
             BytesWritable bw = (BytesWritable) value;
-            out.write(bw.getBytes());
-            out.flush();
+            out.write(bw.copyBytes());
         }
     }
 
 
     @Override
-    public void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+    public synchronized void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
         out.close();
     }
+
 }
